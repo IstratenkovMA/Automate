@@ -4,32 +4,51 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class Automate {
 
     private ArrayList<Signal> signals;
-    private ArrayList<State> Q;
-    private Map<State, Map<Signal, State>> T;
-    private ArrayList<Signal> header = new ArrayList<>();
+    private ArrayList<State> currentStates;
+    private ArrayList<State> endingStates;
+    private ArrayList<State> initialStates;
+    private Map<State, Map<Signal, ArrayList<State>>> T;
+    private ArrayList<Signal> alphabet = new ArrayList<>();
+
+    public Automate() {
+    }
+
+    public Automate(Map<State, Map<Signal, ArrayList<State>>> t, ArrayList<Signal> alphabet) {
+        T = t;
+        this.alphabet = alphabet;
+    }
+
+    public Automate(Map<State, Map<Signal, ArrayList<State>>> t) {
+        T = t;
+    }
 
     public void init(String filePath) {
         T = new HashMap<>();
         URL resource = getClass().getClassLoader().getResource(filePath);
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(resource.getPath()))) {
-            String[] signalsHeader = bufferedReader.readLine().split(" ");
-            for (int i = 0; i < signalsHeader.length; i++) {
-                if (!signalsHeader[i].isEmpty())
-                    header.add(new Signal(signalsHeader[i]));
-            }
+            getHeaderSignals(bufferedReader);
+            getInitialStates(bufferedReader);
+            getEndingStates(bufferedReader);
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 String[] states = line.split(" ");
-                HashMap<Signal, State> stateMap = new HashMap<>();
+                HashMap<Signal, ArrayList<State>> stateMap = new HashMap<>();
                 int headerIndex = 0;
                 for (int i = 1; i < states.length; i++) {
                     if (!states[i].isEmpty()) {
-                        stateMap.put(header.get(headerIndex++), new State(states[i]));
+                        String[] stateMas = states[i].split(",");
+                        ArrayList<State> statesInMap = new ArrayList<>();
+                        for (int j = 0; j < stateMas.length; j++) {
+                            statesInMap.add(new State(stateMas[j]));
+                        }
+                        stateMap.put(alphabet.get(headerIndex++), statesInMap);
                     }
                 }
                 T.put(new State(states[0]), stateMap);
@@ -39,8 +58,32 @@ public abstract class Automate {
         }
     }
 
+    private void getHeaderSignals(BufferedReader bufferedReader) throws IOException {
+        String[] signalsHeader = bufferedReader.readLine().split(" ");
+        for (int i = 0; i < signalsHeader.length; i++) {
+            if (!signalsHeader[i].isEmpty())
+                alphabet.add(new Signal(signalsHeader[i]));
+        }
+    }
+
+    private void getInitialStates(BufferedReader bufferedReader) throws IOException {
+        String[] initialStatesLine = bufferedReader.readLine().split(" ");
+        for (int i = 0; i < initialStatesLine.length; i++) {
+            if (!initialStatesLine[i].isEmpty())
+                initialStates.add(new State(initialStatesLine[i]));
+        }
+    }
+
+    private void getEndingStates(BufferedReader bufferedReader) throws IOException {
+        String[] endingStatesLine = bufferedReader.readLine().split(" ");
+        for (int i = 0; i < endingStatesLine.length; i++) {
+            if (!endingStatesLine[i].isEmpty())
+                initialStates.add(new State(endingStatesLine[i]));
+        }
+    }
+
     public void determinate() {
-        if (!Signal.isCorrect(header, signals)) {
+        if (!Signal.isCorrect(alphabet, signals)) {
             throw new RuntimeException() {
                 @Override
                 public String getMessage() {
@@ -52,21 +95,20 @@ public abstract class Automate {
             doMove(signal);
         }
         if (checkResult())
-            System.out.println(getMessage());
+            System.out.println(getAutomataCorrectMessage());
         else
             System.out.println("Chain not correct of automate");
     }
 
     protected void doMove(Signal signal) {
         ArrayList<State> newQ = new ArrayList<>();
-        for (State state : Q) {
-            newQ.add(T.get(state).get(signal));
+        for (State state : currentStates) {
+            newQ.addAll(T.get(state).get(signal));
         }
-        Q = newQ;
+        currentStates = newQ;
     }
 
-
-    protected abstract String getMessage();
+    protected abstract String getAutomataCorrectMessage();
 
     public abstract boolean checkResult();
 
@@ -78,27 +120,27 @@ public abstract class Automate {
         this.signals = signals;
     }
 
-    public ArrayList<State> getQ() {
-        return Q;
+    public ArrayList<State> getCurrentStates() {
+        return currentStates;
     }
 
-    public void setQ(ArrayList<State> q) {
-        Q = q;
+    public void setCurrentStates(ArrayList<State> currentStates) {
+        this.currentStates = currentStates;
     }
 
-    public Map<State, Map<Signal, State>> getT() {
+    public Map<State, Map<Signal, ArrayList<State>>> getT() {
         return T;
     }
 
-    public void setT(Map<State, Map<Signal, State>> t) {
+    public void setT(Map<State, Map<Signal, ArrayList<State>>> t) {
         T = t;
     }
 
-    public ArrayList<Signal> getHeader() {
-        return header;
+    public ArrayList<Signal> getAlphabet() {
+        return alphabet;
     }
 
-    public void setHeader(ArrayList<Signal> header) {
-        this.header = header;
+    public void setAlphabet(ArrayList<Signal> alphabet) {
+        this.alphabet = alphabet;
     }
 }

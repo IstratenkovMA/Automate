@@ -3,7 +3,7 @@ package automate;
 public class DeterminateAutomate extends Automate {
 
     @Override
-    protected String getMessage() {
+    protected String getAutomataCorrectMessage() {
         return "Congrats";
     }
 
