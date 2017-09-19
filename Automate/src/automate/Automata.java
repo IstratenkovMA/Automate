@@ -42,23 +42,7 @@ public abstract class Automata {
             getEndingStates(bufferedReader);
             getEnterSignals(bufferedReader);
             getHeaderSignals(bufferedReader);
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] states = line.split(" ");
-                HashMap<Signal, ArrayList<State>> stateMap = new HashMap<>();
-                int headerIndex = 0;
-                for (int i = 1; i < states.length; i++) {
-                    if (!states[i].isEmpty()) {
-                        String[] stateMas = states[i].split(",");
-                        ArrayList<State> statesInMap = new ArrayList<>();
-                        for (int j = 0; j < stateMas.length; j++) {
-                            statesInMap.add(new State(stateMas[j]));
-                        }
-                        stateMap.put(alphabet.get(headerIndex++), statesInMap);
-                    }
-                }
-                T.put(new State(states[0]), stateMap);
-            }
+            getBodyStates(bufferedReader);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -96,6 +80,26 @@ public abstract class Automata {
         for (int i = 0; i < enterSignals.length; i++) {
             if (!enterSignals[i].isEmpty())
                 signals.add(new Signal(enterSignals[i]));
+        }
+    }
+
+    private void getBodyStates(BufferedReader bufferedReader) throws IOException {
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            String[] states = line.split(" ");
+            HashMap<Signal, ArrayList<State>> stateMap = new HashMap<>();
+            int headerIndex = 0;
+            for (int i = 1; i < states.length; i++) {
+                if (!states[i].isEmpty()) {
+                    String[] stateMas = states[i].split(",");
+                    ArrayList<State> statesInMap = new ArrayList<>();
+                    for (int j = 0; j < stateMas.length; j++) {
+                        statesInMap.add(new State(stateMas[j]));
+                    }
+                    stateMap.put(alphabet.get(headerIndex++), statesInMap);
+                }
+            }
+            T.put(new State(states[0]), stateMap);
         }
     }
 

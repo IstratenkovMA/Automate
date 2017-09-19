@@ -6,7 +6,7 @@ public class IndeterminateAutomate extends Automata {
 
     @Override
     protected String getAutomataCorrectMessage() {
-        return "Siquense is correct for Indeterminate Automata";
+        return "Sequence is correct for Automata";
     }
 
     @Override

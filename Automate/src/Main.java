@@ -18,7 +18,7 @@ public class Main {
 //                add(new State("q1"));
 //            }
 //        });
-        automata.init("resources/Test2.txt");
+        automata.init("resources/Test3.txt");
         automata.determinate();
     }
 }
