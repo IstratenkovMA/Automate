@@ -2,20 +2,18 @@ package automate;
 
 import java.util.ArrayList;
 
-public class IndeterminateAutomate extends Automate {
-
-    ArrayList<State> endingState = new ArrayList<>();
+public class IndeterminateAutomate extends Automata {
 
     @Override
     protected String getAutomataCorrectMessage() {
-        return "Congrats";
+        return "Siquense is correct for Indeterminate Automata";
     }
 
     @Override
     public boolean checkResult() {
-        endingState.add(new State("q0"));
-        for(State state : endingState)
-            if(getCurrentStates().contains(state)) {
+        ArrayList<State> endingStates = getEndingStates();
+        for (State state : endingStates)
+            if (getCurrentStates().contains(state)) {
                 return true;
             }
         return false;
